@@ -184,7 +184,7 @@ where
 {
     let mut cmd_str = format!("::{}", command.as_ref());
 
-    if properties.len() > 0 {
+    if !properties.is_empty() {
         let joined_props = properties
             .iter()
             .map(|(key, value)| format!("{}={}", key, escape_property(value)))
@@ -212,7 +212,7 @@ where
 {
     let mut params = Vec::new();
     if let Some(file) = file {
-        params.push(("file".to_owned(), file.to_owned()))
+        params.push(("file".to_owned(), file))
     }
     if let Some(line) = line {
         params.push(("line".to_owned(), format!("{}", line)))
