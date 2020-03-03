@@ -1,6 +1,6 @@
 # actions-cli - GitHub actions without JavaScript
 
-Some weird people enjoy writing Bash more than JavaScript.
+Some weird people (like me) enjoy writing Bash more than JavaScript.
 
 This little tool wraps common tasks that one would do with GitHub actions and
 is currently only supported by https://github.com/actions/toolkit/
@@ -51,4 +51,9 @@ SUBCOMMANDS:
 ```
 ::add-path::/root
 ```
+
+## Missing features
+
+* pull-request post-comment <comment>: a command that posts a comment to the
+    current pull-request.
 
