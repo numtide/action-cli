@@ -12,7 +12,7 @@ TODO: add one-liner installation
 
 `$ actions-cli --help`
 ```
-action 0.1.0
+actions-cli 0.1.0
 
 USAGE:
     actions-cli <SUBCOMMAND>
@@ -26,29 +26,29 @@ FLAGS:
 
 
 SUBCOMMANDS:
-    add-path         Prepends input_path to the PATH (for future actions)
-    debug            Writes debug message to user log
+    add-mask         Mask a value in log
+    add-path         Add a system path
+    debug            Set a debug message
     end-group        End an output group
-    error            Adds an error issue
-    export           Exports an existing env variable for future actions in the job
+    error            Set an error message
+    export           Like set-env but exports an existing environment variable
     get-input        Gets the value of an input. The value is also trimmed
     get-state        Gets the value of an state set by this action's main execution
     help             Prints this message or the help of the given subcommand(s)
-    info             Writes info to log. This is a bit useless, it's just prints to stdout
     is-debug         Gets whether Actions Step Debug is on or not
     issue-command    The generic version of the other commands
     save-state       Saves state for current action, the state can only be retrieved by this action's post job
                      execution
-    set-output       Sets the value of an output
-    set-secret       Registers a secret which will get masked from logs
+    set-env          Set and environment variable for future actions in the job
+    set-output       Set an output parameter
     start-group      Begin an output group
-    warning          Adds a warning issue
+    warning          Set a warning message
 ```
 
 ## Example
 
-`$ actions-cli add-path ~/.local/bin`
+`$ actions-cli add-path ~root`
 ```
-::add-path::/home/zimbatm/.local/bin
+::add-path::/root
 ```
 
