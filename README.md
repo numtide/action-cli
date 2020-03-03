@@ -12,7 +12,7 @@ TODO: add one-liner installation
 
 `$ actions-cli --help`
 ```
-actions-cli 0.1.0
+actions-cli 0.2.0
 
 USAGE:
     actions-cli <SUBCOMMAND>
