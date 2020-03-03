@@ -129,9 +129,7 @@ pub enum Command {
     ///
     ///     actions-cli issue-command "endtoken"
     ///
-    StopCommands {
-        endtoken: String,
-    },
+    StopCommands { endtoken: String },
     /// Gets the value of an input. The value is also trimmed.
     GetInput {
         name: String,
@@ -168,7 +166,10 @@ struct Opt {
 }
 
 fn escape_data<T: AsRef<str>>(s: T) -> String {
-    s.as_ref().replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+    s.as_ref()
+        .replace("%", "%25")
+        .replace("\r", "%0D")
+        .replace("\n", "%0A")
 }
 
 fn escape_property<T: AsRef<str>>(s: T) -> String {
@@ -183,10 +184,12 @@ where
 {
     let mut cmd_str = format!("::{}", command.as_ref());
 
-    if properties.len() > 0 {
-        let joined_props = properties.iter().map(|(key, value)|
-            format!("{}={}", key, escape_property(value))
-        ).collect::<Vec<String>>().join(",");
+    if !properties.is_empty() {
+        let joined_props = properties
+            .iter()
+            .map(|(key, value)| format!("{}={}", key, escape_property(value)))
+            .collect::<Vec<String>>()
+            .join(",");
 
         cmd_str = format!("{} {}", cmd_str, joined_props);
     }
@@ -196,14 +199,20 @@ where
     cmd_str
 }
 
-fn log_command<T, U>(command: T, message: U, file: Option<String>, line: Option<u64>, col: Option<u64>) -> String
+fn log_command<T, U>(
+    command: T,
+    message: U,
+    file: Option<String>,
+    line: Option<u64>,
+    col: Option<u64>,
+) -> String
 where
     T: AsRef<str>,
     U: AsRef<str>,
 {
     let mut params = Vec::new();
     if let Some(file) = file {
-        params.push(("file".to_owned(), file.to_owned()))
+        params.push(("file".to_owned(), file))
     }
     if let Some(line) = line {
         params.push(("line".to_owned(), format!("{}", line)))
@@ -219,76 +228,81 @@ where
     T: AsRef<str>,
     U: AsRef<str>,
 {
-    issue_command(command, message, vec!())
+    issue_command(command, message, vec![])
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
 
     let out = match opt.command {
-        Command::IssueCommand { command, message, properties } => {
-            match message {
-                Some(message) =>
-                    issue_command(&command[..], message, properties),
-                None =>
-                    issue_command(&command[..], "", properties),
-            }
+        Command::IssueCommand {
+            command,
+            message,
+            properties,
+        } => match message {
+            Some(message) => issue_command(&command[..], message, properties),
+            None => issue_command(&command[..], "", properties),
         },
         Command::SetEnv { key, value } => {
-            issue_command("set-env", value, vec!(("name".to_owned(), key)))
-        },
+            issue_command("set-env", value, vec![("name".to_owned(), key)])
+        }
         Command::Export { key } => {
             let val = std::env::var(key.clone())?;
-            issue_command("set-env", val, vec!(("name".to_owned(), key)))
-        },
+            issue_command("set-env", val, vec![("name".to_owned(), key)])
+        }
         Command::SetOutput { name, value } => {
-            issue_command("set-output", value, vec!(("name".to_owned(), name)))
-        },
+            issue_command("set-output", value, vec![("name".to_owned(), name)])
+        }
         Command::AddPath { path } => {
             let path = std::fs::canonicalize(path)?;
             issue("add-path", path.to_string_lossy().into_owned())
-        },
-        Command::AddMask { value } => {
-            issue("add-mask", value )
-        },
+        }
+        Command::AddMask { value } => issue("add-mask", value),
         Command::GetInput { name, required } => {
             let key = format!("INPUT_{}", name.replace(" ", "_").to_ascii_uppercase());
             match std::env::var(key) {
                 Ok(val) => val.trim().to_owned(),
-                Err(e) => if required { panic!(e) } else { "".to_owned() }
+                Err(e) => {
+                    if required {
+                        panic!(e)
+                    } else {
+                        "".to_owned()
+                    }
+                }
             }
-        },
-        Command::IsDebug => {
-            std::env::var("RUNNER_DEBUG")?
-        },
-        Command::Debug { message, file, line, col } => {
-            log_command("debug", message, file, line, col)
-        },
-        Command::Warning { message, file, line, col } => {
-            log_command("warning", message, file, line, col)
-        },
-        Command::Error { message, file, line, col } => {
-            log_command("error", message, file, line, col)
-        },
-        Command::StopCommands { endtoken } => {
-            issue("stop-commands", endtoken)
-        },
-        Command::StartGroup { name } => {
-            issue("group", name)
-        },
-        Command::EndGroup => {
-            issue("endgroup", "".to_owned())
-        },
+        }
+        Command::IsDebug => std::env::var("RUNNER_DEBUG")?,
+        Command::Debug {
+            message,
+            file,
+            line,
+            col,
+        } => log_command("debug", message, file, line, col),
+        Command::Warning {
+            message,
+            file,
+            line,
+            col,
+        } => log_command("warning", message, file, line, col),
+        Command::Error {
+            message,
+            file,
+            line,
+            col,
+        } => log_command("error", message, file, line, col),
+        Command::StopCommands { endtoken } => issue("stop-commands", endtoken),
+        Command::StartGroup { name } => issue("group", name),
+        Command::EndGroup => issue("endgroup", "".to_owned()),
         Command::SaveState { name, value } => {
-            issue_command("save-state", value, vec!(("name".to_owned(), name)))
-        },
+            issue_command("save-state", value, vec![("name".to_owned(), name)])
+        }
         Command::GetState { name } => {
             let key = format!("STATE_{}", name);
             match std::env::var(key) {
                 Ok(val) => val,
                 Err(_) => "".to_owned(),
             }
-        },
+        }
     };
 
     println!("{}", out);
