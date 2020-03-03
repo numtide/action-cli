@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::result::Result;
 use structopt::StructOpt;
 
 /// Parse a single key-value pair
@@ -22,7 +23,7 @@ pub enum Command {
         #[structopt(short, long = "prop", parse(try_from_str = parse_key_val), name = "key=value")]
         properties: Vec<(String, String)>,
         command: String,
-        message: String,
+        message: Option<String>,
     },
     /// Set and environment variable for future actions in the job
     ///
@@ -76,7 +77,7 @@ pub enum Command {
         file: Option<String>,
         #[structopt(short, long)]
         line: Option<u64>,
-        #[structopt(short, long)]
+        #[structopt(short, long, alias = "column", name = "column")]
         col: Option<u64>,
         /// Debug message
         message: String,
@@ -90,9 +91,9 @@ pub enum Command {
         file: Option<String>,
         #[structopt(short, long)]
         line: Option<u64>,
-        #[structopt(short, long)]
+        #[structopt(short, long, alias = "column", name = "column")]
         col: Option<u64>,
-        /// Issue message
+        /// Warning message
         message: String,
     },
     /// Set an error message
@@ -104,9 +105,9 @@ pub enum Command {
         file: Option<String>,
         #[structopt(short, long)]
         line: Option<u64>,
-        #[structopt(short, long)]
+        #[structopt(short, long, alias = "column", name = "column")]
         col: Option<u64>,
-        /// Issue message
+        /// Error message
         message: String,
     },
     /// Mask a value in log
@@ -117,6 +118,19 @@ pub enum Command {
     AddMask {
         /// Value of the secret
         value: String,
+    },
+    /// Stop and start log commands
+    ///
+    /// Stops processing any logging commands. This special command allows you to log anything
+    /// without accidentally running a log command. For example, you could stop logging to
+    /// output an entire script that has comments.
+    ///
+    /// To start log commands, pass the token that you used to stop logging. Eg:
+    ///
+    ///     actions-cli issue-command "endtoken"
+    ///
+    StopCommands {
+        endtoken: String,
     },
     /// Gets the value of an input. The value is also trimmed.
     GetInput {
@@ -208,28 +222,31 @@ where
     issue_command(command, message, vec!())
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
 
     let out = match opt.command {
-        Command::IssueCommand { command, message, properties } => issue_command(&command[..], message, properties),
+        Command::IssueCommand { command, message, properties } => {
+            match message {
+                Some(message) =>
+                    issue_command(&command[..], message, properties),
+                None =>
+                    issue_command(&command[..], "", properties),
+            }
+        },
         Command::SetEnv { key, value } => {
             issue_command("set-env", value, vec!(("name".to_owned(), key)))
         },
         Command::Export { key } => {
-            match std::env::var(key.clone()) {
-                Ok(val) => issue_command("set-env", val, vec!(("name".to_owned(), key))),
-                Err(e) => panic!(e)
-            }
+            let val = std::env::var(key.clone())?;
+            issue_command("set-env", val, vec!(("name".to_owned(), key)))
         },
         Command::SetOutput { name, value } => {
             issue_command("set-output", value, vec!(("name".to_owned(), name)))
         },
         Command::AddPath { path } => {
-            match std::fs::canonicalize(path) {
-                Ok(path) => issue("add-path", path.to_string_lossy().into_owned()),
-                Err(e) => panic!(e),
-            }
+            let path = std::fs::canonicalize(path)?;
+            issue("add-path", path.to_string_lossy().into_owned())
         },
         Command::AddMask { value } => {
             issue("add-mask", value )
@@ -237,15 +254,12 @@ fn main() {
         Command::GetInput { name, required } => {
             let key = format!("INPUT_{}", name.replace(" ", "_").to_ascii_uppercase());
             match std::env::var(key) {
-                Ok(val) => val,
+                Ok(val) => val.trim().to_owned(),
                 Err(e) => if required { panic!(e) } else { "".to_owned() }
             }
         },
         Command::IsDebug => {
-            match std::env::var("RUNNER_DEBUG") {
-                Ok(val) => val,
-                Err(e) => panic!(e)
-            }
+            std::env::var("RUNNER_DEBUG")?
         },
         Command::Debug { message, file, line, col } => {
             log_command("debug", message, file, line, col)
@@ -255,6 +269,9 @@ fn main() {
         },
         Command::Error { message, file, line, col } => {
             log_command("error", message, file, line, col)
+        },
+        Command::StopCommands { endtoken } => {
+            issue("stop-commands", endtoken)
         },
         Command::StartGroup { name } => {
             issue("group", name)
@@ -274,5 +291,6 @@ fn main() {
         },
     };
 
-    println!("{}", out)
+    println!("{}", out);
+    Ok(())
 }

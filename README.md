@@ -42,6 +42,7 @@ SUBCOMMANDS:
     set-env          Set and environment variable for future actions in the job
     set-output       Set an output parameter
     start-group      Begin an output group
+    stop-commands    Stop and start log commands
     warning          Set a warning message
 ```
 
