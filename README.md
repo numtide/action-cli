@@ -6,9 +6,22 @@ This little tool wraps common tasks that one would do with GitHub actions and
 is currently only supported by https://github.com/actions/toolkit/
 
 This first version wraps all of the logging commands from https://help.github.com/en/actions/reference/development-tools-for-github-actions#logging-commands
-## Usage
 
-TODO: add one-liner installation
+## Example usage
+
+```yaml
+name: 'actions-cli'
+on: ["push"]
+jobs:
+  self-test:
+    name: Self test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zimbatm/actions-cli@v0.2.0
+      - run: actions-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
+```
+
+## CLI Usage
 
 `$ actions-cli --help`
 ```
@@ -44,13 +57,6 @@ SUBCOMMANDS:
     start-group      Begin an output group
     stop-commands    Stop and start log commands
     warning          Set a warning message
-```
-
-## Example
-
-`$ actions-cli add-path ~root`
-```
-::add-path::/root
 ```
 
 ## Missing features
