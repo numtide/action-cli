@@ -20,7 +20,7 @@ jobs:
     name: Self test
     runs-on: ubuntu-latest
     steps:
-      - uses: zimbatm/action-cli@v0.2.0
+      - uses: zimbatm/action-cli@v0.3.0
       - run: action-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
 ```
 
@@ -30,7 +30,7 @@ Here are all the commands available once the CLI is installed:
 
 `$ action-cli --help`
 ```
-action-cli 0.2.0
+action-cli 0.3.0
 
 USAGE:
     action-cli <SUBCOMMAND>
