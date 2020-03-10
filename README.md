@@ -2,12 +2,15 @@
 
 Some weird people (like me) enjoy writing Bash more than JavaScript.
 
-This little tool wraps common tasks that one would do with GitHub actions and
+This little tool wraps common tasks that one would do with GitHub Actions and
 is currently only supported by https://github.com/actions/toolkit/
 
-This first version wraps all of the logging commands from https://help.github.com/en/actions/reference/development-tools-for-github-actions#logging-commands
+This first version wraps all of the logging commands from
+https://help.github.com/en/actions/reference/development-tools-for-github-actions#logging-commands
 
-## Example usage
+## Installation
+
+action-cli can easily be installed in a pipeline and only adds ~1s to it:
 
 ```yaml
 name: 'action-cli'
@@ -21,7 +24,9 @@ jobs:
       - run: action-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
 ```
 
-## CLI Usage
+## Usage
+
+Here are all the commands available once the CLI is installed:
 
 `$ action-cli --help`
 ```
@@ -64,4 +69,5 @@ SUBCOMMANDS:
 * pull-request post-comment <comment>: a command that posts a comment to the
     current pull-request.
 * windows support: it's almost done, it just needs an installer in action.js
+* add an installer when you want to use it in other actions.
 
