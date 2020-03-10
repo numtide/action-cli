@@ -1,5 +1,5 @@
 [package]
-name = "actions-cli"
+name = "action-cli"
 description = "GitHub Actions without JavaScript"
 version = "0.2.0"
 authors = ["zimbatm <zimbatm@zimbatm.com>"]

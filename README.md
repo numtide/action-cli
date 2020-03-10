@@ -1,4 +1,4 @@
-# actions-cli - GitHub actions without JavaScript
+# action-cli - GitHub actions without JavaScript
 
 Some weird people (like me) enjoy writing Bash more than JavaScript.
 
@@ -10,25 +10,25 @@ This first version wraps all of the logging commands from https://help.github.co
 ## Example usage
 
 ```yaml
-name: 'actions-cli'
+name: 'action-cli'
 on: ["push"]
 jobs:
   self-test:
     name: Self test
     runs-on: ubuntu-latest
     steps:
-      - uses: zimbatm/actions-cli@v0.2.0
-      - run: actions-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
+      - uses: zimbatm/action-cli@v0.2.0
+      - run: action-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
 ```
 
 ## CLI Usage
 
-`$ actions-cli --help`
+`$ action-cli --help`
 ```
-actions-cli 0.2.0
+action-cli 0.2.0
 
 USAGE:
-    actions-cli <SUBCOMMAND>
+    action-cli <SUBCOMMAND>
 
 FLAGS:
     -h, --help       
