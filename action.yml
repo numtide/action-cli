@@ -1,0 +1,9 @@
+name: 'Install actions-cli'
+description: 'Installs actions-cli, a command-line tool for other actions'
+author: 'zimbatm'
+branding:
+  color: 'blue'
+  icon: 'hash'
+runs:
+  using: 'node12'
+  main: 'action.js'
