@@ -63,4 +63,5 @@ SUBCOMMANDS:
 
 * pull-request post-comment <comment>: a command that posts a comment to the
     current pull-request.
+* windows support: it's almost done, it just needs an installer in action.js
 

@@ -9,19 +9,19 @@ const cargoToml = fs.readFileSync(path.join(__dirname, 'Cargo.toml'));
 const version = /version *= *"([^"]+)"/.exec(cargoToml)[1];
 
 // Build the download URL
-const baseURL = "https://github.com/zimbatm/actions-cli/releases/download/v" + version;
+const baseURL = "https://github.com/zimbatm/action-cli/releases/download/v" + version;
 const system = os.platform() + "-" + os.arch()
 
 let filename;
 switch(system) {
   case "linux-x64":
-    filename = "actions-cli-x86_64-unknown-linux-musl.tar.gz";
+    filename = "action-cli-x86_64-unknown-linux-musl.tar.gz";
     break;
   case "darwin-x64":
-    filename = "actions-cli-x86_64-apple-darwin.tar.gz";
+    filename = "action-cli-x86_64-apple-darwin.tar.gz";
     break;
   case "win32-x64":
-    filename = "actions-cli-x86_64-pc-windows-msvc.zip";
+    filename = "action-cli-x86_64-pc-windows-msvc.zip";
     break;
   default:
     throw "System " + system + " not supported";
@@ -45,6 +45,6 @@ switch(system) {
     throw "System " + system + " not supported";
 }
 
-child_process.execSync('actions-cli --help >&2')
+child_process.execSync('action-cli --help >&2')
 console.log();
 console.log(`action-cli v${version} installed`);

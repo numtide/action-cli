@@ -1,5 +1,5 @@
-name: 'Install actions-cli'
-description: 'Installs actions-cli, a command-line tool for other actions'
+name: 'Install action-cli'
+description: 'Installs action-cli, a command-line tool for other actions'
 author: 'zimbatm'
 branding:
   color: 'blue'

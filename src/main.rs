@@ -127,7 +127,7 @@ pub enum Command {
     ///
     /// To start log commands, pass the token that you used to stop logging. Eg:
     ///
-    ///     actions-cli issue-command "endtoken"
+    ///     action-cli issue-command "endtoken"
     ///
     StopCommands { endtoken: String },
     /// Gets the value of an input. The value is also trimmed.
