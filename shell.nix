@@ -3,6 +3,7 @@ mkShell {
   buildInputs = [
     cargo
     clippy
+    mdsh
     rustc
     rustfmt
   ];
