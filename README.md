@@ -71,3 +71,14 @@ SUBCOMMANDS:
 * windows support: it's almost done, it just needs an installer in action.js
 * add an installer when you want to use it in other actions.
 
+## License
+
+This work is licensed under the Apache License 2.0.
+See [LICENSE](LICENSE) for more details.
+
+## Sponsors
+
+This work has been sponsored by [NumTide](https://numtide.com).
+
+[![NumTide](https://avatars3.githubusercontent.com/u/20373834?s=200&v=4)](https://numtide.com)
+

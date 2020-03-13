@@ -5,7 +5,7 @@ version = "0.3.0"
 authors = ["zimbatm <zimbatm@zimbatm.com>"]
 edition = "2018"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
