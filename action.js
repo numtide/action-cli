@@ -15,7 +15,7 @@ const system = os.platform() + "-" + os.arch()
 let filename;
 switch(system) {
   case "linux-x64":
-    filename = "action-cli-x86_64-unknown-linux-musl.tar.gz";
+    filename = "action-cli-x86_64-unknown-linux-gnu.tar.gz";
     break;
   case "darwin-x64":
     filename = "action-cli-x86_64-apple-darwin.tar.gz";

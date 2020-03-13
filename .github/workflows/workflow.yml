@@ -149,16 +149,12 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
           - x86_64-apple-darwin
           - x86_64-pc-windows-msvc
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             name: action-cli-x86_64-unknown-linux-gnu.tar.gz
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
-            name: action-cli-x86_64-unknown-linux-musl.tar.gz
           - target: x86_64-apple-darwin
             os: macOS-latest
             name: action-cli-x86_64-apple-darwin.tar.gz
@@ -176,10 +172,6 @@ jobs:
           toolchain: stable
           override: true
           target: ${{ matrix.target }}
-
-      - name: Install musl tools
-        if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: sudo apt-get install -y musl-tools
 
       - name: Build target
         uses: actions-rs/cargo@v1
@@ -227,11 +219,6 @@ jobs:
       - name: Download releases from github_build
         uses: actions/download-artifact@v1
         with:
-          name: action-cli-x86_64-unknown-linux-musl.tar.gz
-          path: .
-      - name: Download releases from github_build
-        uses: actions/download-artifact@v1
-        with:
           name: action-cli-x86_64-apple-darwin.tar.gz
           path: .
       - name: Download releases from github_build
@@ -249,8 +236,6 @@ jobs:
           files: |
             action-cli-x86_64-unknown-linux-gnu.tar.gz
             action-cli-x86_64-unknown-linux-gnu.tar.gz.sha256
-            action-cli-x86_64-unknown-linux-musl.tar.gz
-            action-cli-x86_64-unknown-linux-musl.tar.gz.sha256
             action-cli-x86_64-apple-darwin.tar.gz
             action-cli-x86_64-apple-darwin.tar.gz.sha256
             action-cli-x86_64-pc-windows-msvc.zip
