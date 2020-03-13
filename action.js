@@ -9,7 +9,7 @@ const cargoToml = fs.readFileSync(path.join(__dirname, 'Cargo.toml'));
 const version = /version *= *"([^"]+)"/.exec(cargoToml)[1];
 
 // Build the download URL
-const baseURL = "https://github.com/zimbatm/action-cli/releases/download/v" + version;
+const baseURL = "https://github.com/numtide/action-cli/releases/download/v" + version;
 const system = os.platform() + "-" + os.arch()
 
 let filename;

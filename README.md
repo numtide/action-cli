@@ -20,7 +20,7 @@ jobs:
     name: Self test
     runs-on: ubuntu-latest
     steps:
-      - uses: zimbatm/action-cli@v0.3.0
+      - uses: numtide/action-cli@v0.3.0
       - run: action-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
 ```
 
