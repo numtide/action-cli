@@ -64,13 +64,6 @@ SUBCOMMANDS:
     warning          Set a warning message
 ```
 
-## Missing features
-
-* pull-request post-comment <comment>: a command that posts a comment to the
-    current pull-request.
-* windows support: it's almost done, it just needs an installer in action.js
-* add an installer when you want to use it in other actions.
-
 ## License
 
 This work is licensed under the Apache License 2.0.
