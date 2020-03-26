@@ -6,5 +6,7 @@ mkShell {
     mdsh
     rustc
     rustfmt
+    openssl
+    pkgconfig
   ];
 }
