@@ -328,7 +328,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::PostComment { message, secret } => {
             let client = reqwest::blocking::Client::new();
             let github_event_path = env::var("GITHUB_EVENT_PATH")?;
-            /*let v: Value = serde_json::from_str(&github_event_path)?;
+            let v: Value = serde_json::from_str(&github_event_path)?;
             let uri = v["pull_request"]["comments_url"].as_str();
 
             fn construct_headers() -> HeaderMap {
@@ -338,12 +338,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 headers
             }
 
-            let _res = client.post(uri.unwrap_or(""))
+            let res = client.post(uri.unwrap_or(""))
                 .headers(construct_headers())
                 .bearer_auth(secret)
                 .body(message)
-                .send()?;*/
-            issue("post-comment", &github_event_path)
+                .send()?.status().canonical_reason().unwrap_or("").to_lowercase();
+            issue("post-comment", &res)
         }
     };
 
