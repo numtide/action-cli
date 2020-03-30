@@ -328,8 +328,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::PostComment { message, token } => {
             let action_headers = {
                 let mut headers = HeaderMap::new();
-                // TODO: It will be easy if package version obtained from std::env(CARGO_PKG_VERSION), but String to &str is not possible unless we use Box::leak.
-                headers.insert(USER_AGENT, HeaderValue::from_static("action-cli 0.4.0"));
+                let user_agent = format!("action-cli/{}", std::env!("CARGO_PKG_VERSION"));
+                headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent)?);
                 headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
                 headers
             };
