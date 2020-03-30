@@ -1,3 +1,6 @@
+use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, USER_AGENT};
+use serde_json::Value;
+use std::env;
 use std::error::Error;
 use std::result::Result;
 use structopt::StructOpt;
@@ -157,6 +160,14 @@ pub enum Command {
         /// Name of the state to get
         name: String,
     },
+    /// Creating comment based on issues and pull requests
+    PostComment {
+        /// The content of comment message
+        message: String,
+        /// The secret name for authorization. GITHUB_TOKEN is used by default.
+        #[structopt(short, long, env = "GITHUB_TOKEN")]
+        token: String,
+    },
 }
 
 #[derive(StructOpt, Debug)]
@@ -176,7 +187,18 @@ fn escape_property<T: AsRef<str>>(s: T) -> String {
     escape_data(s).replace(":", "%3A").replace(",", "%2C")
 }
 
-// https://github.com/actions/toolkit/blob/3261dd988308cb227481dc6580026034e5780160/packages/core/src/command.ts
+/*
+ * Taken from:  https://github.com/actions/toolkit/blob/master/packages/core/src/command.ts
+ * Commands
+ *
+ * Command Format:
+ *   ::name key=value,key=value::message
+ *
+ * Examples:
+ *   ::warning::This is the message
+ *   ::set-env name=MY_VAR::some value
+ */
+//s
 fn issue_command<T, U>(command: T, message: U, properties: Vec<(String, String)>) -> String
 where
     T: AsRef<str>,
@@ -301,6 +323,39 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             match std::env::var(key) {
                 Ok(val) => val,
                 Err(_) => "".to_owned(),
+            }
+        }
+        Command::PostComment { message, token } => {
+            let action_headers = {
+                let mut headers = HeaderMap::new();
+                // TODO: It will be easy if package version obtained from std::env(CARGO_PKG_VERSION), but String to &str is not possible unless we use Box::leak.
+                headers.insert(USER_AGENT, HeaderValue::from_static("action-cli 0.4.0"));
+                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                headers
+            };
+
+            let client = reqwest::blocking::Client::new();
+            let github_event_path = env::var("GITHUB_EVENT_PATH")?;
+            let v: Value = serde_json::from_str(&github_event_path)?;
+            let pull_request = &v["pull_request"];
+            if pull_request.is_object() {
+                let uri = pull_request["comments_url"].as_str();
+                let res = client
+                    .post(uri.unwrap_or(""))
+                    .headers(action_headers)
+                    .bearer_auth(token)
+                    .body(message)
+                    .send()?
+                    .status();
+                match res.as_u16() {
+                    201 => issue("post-comment", "posted comment to pull-request."),
+                    _ => issue("post-comment", &"cannot post comment."),
+                }
+            } else {
+                issue(
+                    "Error",
+                    &"post-comment only works inside \"pull_requests\" events.",
+                )
             }
         }
     };
