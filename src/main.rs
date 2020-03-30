@@ -165,8 +165,8 @@ pub enum Command {
         /// The content of comment message
         message: String,
         /// The secret name for authorization. GITHUB_TOKEN is used by default.
-        #[structopt(short="t", long="token", default_value = "GITHUB_TOKEN")]
-        secret: String,
+        #[structopt(short, long, env = "GITHUB_TOKEN")]
+        token: String,
     },
 }
 
@@ -325,25 +325,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(_) => "".to_owned(),
             }
         }
-        Command::PostComment { message, secret } => {
+        Command::PostComment { message, token } => {
+            let action_headers = {
+                let mut headers = HeaderMap::new();
+                // TODO: It will easy if package version obtained from std::env(CARGO_PKG_VERSION), but String to &str is not possible unless we use Box::leak. 
+                headers.insert(USER_AGENT, HeaderValue::from_static("action-cli 0.4.0"));
+                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                headers
+            };
+            
             let client = reqwest::blocking::Client::new();
             let github_event_path = env::var("GITHUB_EVENT_PATH")?;
             let v: Value = serde_json::from_str(&github_event_path)?;
-            let uri = v["pull_request"]["comments_url"].as_str();
-
-            fn construct_headers() -> HeaderMap {
-                let mut headers = HeaderMap::new();
-                headers.insert(USER_AGENT, HeaderValue::from_static("action-cli"));
-                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-                headers
+            let pull_request = &v["pull_request"];
+            if pull_request.is_object() {
+                let uri = pull_request["comments_url"].as_str();
+                let res = client.post(uri.unwrap_or(""))
+                                .headers(action_headers)
+                                .bearer_auth(token)
+                                .body(message)
+                                .send()?.status();
+                match res.as_u16() {
+                    201 => issue("post-comment", "posted comment to pull-request."),
+                    _ => issue("post-comment", &"cannot post comment.")                 
+                }          
+            } else {
+                issue("Error", &"post-comment only works inside \"pull_requests\" events.")
             }
-
-            let res = client.post(uri.unwrap_or(""))
-                .headers(construct_headers())
-                .bearer_auth(secret)
-                .body(message)
-                .send()?.status().canonical_reason().unwrap_or("").to_lowercase();
-            issue("post-comment", &res)
         }
     };
 
