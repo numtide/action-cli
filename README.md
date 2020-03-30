@@ -30,7 +30,7 @@ Here are all the commands available once the CLI is installed:
 
 `$ action-cli --help`
 ```
-action-cli 0.4.0
+action-cli 0.5.0
 
 USAGE:
     action-cli <SUBCOMMAND>
@@ -55,6 +55,7 @@ SUBCOMMANDS:
     help             Prints this message or the help of the given subcommand(s)
     is-debug         Gets whether Actions Step Debug is on or not
     issue-command    The generic version of the other commands
+    post-comment     Creating comment based on issues and pull requests
     save-state       Saves state for current action, the state can only be retrieved by this action's post job
                      execution
     set-env          Set and environment variable for future actions in the job
