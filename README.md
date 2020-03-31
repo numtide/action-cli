@@ -20,7 +20,7 @@ jobs:
     name: Self test
     runs-on: ubuntu-latest
     steps:
-      - uses: numtide/action-cli@v0.6.0
+      - uses: numtide/action-cli@v0.7.0
       - run: action-cli warning --file Cargo.toml --line 2 --col 2 "Ooops"
 ```
 
@@ -30,7 +30,7 @@ Here are all the commands available once the CLI is installed:
 
 `$ action-cli --help`
 ```
-action-cli 0.6.0
+action-cli 0.7.0
 
 USAGE:
     action-cli <SUBCOMMAND>
