@@ -1,5 +1,5 @@
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, USER_AGENT};
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::env;
 use std::error::Error;
 use std::result::Result;
@@ -253,6 +253,52 @@ where
     issue_command(command, message, vec![])
 }
 
+/// Sends a comment to a comments_url on GitHub
+fn post_comment(comments_url: String, github_token: String, message: String) -> Result<(), Box<dyn std::error::Error>> {
+    let action_headers = {
+        let mut headers = HeaderMap::new();
+        let user_agent = format!("action-cli/{}", std::env!("CARGO_PKG_VERSION"));
+        headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent)?);
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+        headers
+    };
+
+    let client = reqwest::blocking::Client::new();
+    let body = json!({
+        "body": message
+    });
+    let resp = client
+        .post(&comments_url)
+        .headers(action_headers)
+        .bearer_auth(github_token)
+        .body(body.to_string())
+        .send()?;
+
+    if resp.status().is_success() {
+        Ok(())
+    } else {
+        panic!(format!("invalid response from GitHub"));
+    }
+}
+
+/// Extracts the comments_url from a github event
+///
+/// This only works for events that are created by pull_request events
+fn get_comments_url() -> Result<String, Box<dyn std::error::Error>> {
+    let github_event_path = env::var("GITHUB_EVENT_PATH")?;
+    let github_event_file = std::fs::File::open(github_event_path)?;
+    let v: Value = serde_json::from_reader(&github_event_file)?;
+    let pull_request = &v["pull_request"];
+    if pull_request.is_object() {
+        match pull_request["comments_url"].as_str() {
+            None => panic!("comments_url missing"),
+            Some(comments_url) => Ok(comments_url.to_owned())
+        }
+    } else {
+        panic!("this action only works inside of \"pull_request\" events.");
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
 
@@ -326,37 +372,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         Command::PostComment { message, token } => {
-            let action_headers = {
-                let mut headers = HeaderMap::new();
-                let user_agent = format!("action-cli/{}", std::env!("CARGO_PKG_VERSION"));
-                headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent)?);
-                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-                headers
-            };
-
-            let client = reqwest::blocking::Client::new();
-            let github_event_path = env::var("GITHUB_EVENT_PATH")?;
-            let v: Value = serde_json::from_str(&github_event_path)?;
-            let pull_request = &v["pull_request"];
-            if pull_request.is_object() {
-                let uri = pull_request["comments_url"].as_str();
-                let res = client
-                    .post(uri.unwrap_or(""))
-                    .headers(action_headers)
-                    .bearer_auth(token)
-                    .body(message)
-                    .send()?
-                    .status();
-                match res.as_u16() {
-                    201 => issue("post-comment", "posted comment to pull-request."),
-                    _ => issue("post-comment", &"cannot post comment."),
-                }
-            } else {
-                issue(
-                    "Error",
-                    &"post-comment only works inside \"pull_requests\" events.",
-                )
-            }
+            let comments_url = get_comments_url()?;
+            post_comment(comments_url, token, message)?;
+            "comment posted".to_owned()
         }
     };
 
