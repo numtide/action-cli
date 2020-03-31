@@ -279,7 +279,7 @@ fn post_comment(
     if resp.status().is_success() {
         Ok(())
     } else {
-        panic!(format!("invalid response from GitHub"));
+        panic!("invalid response from GitHub");
     }
 }
 
