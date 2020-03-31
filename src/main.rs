@@ -1,5 +1,5 @@
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, USER_AGENT};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::env;
 use std::error::Error;
 use std::result::Result;
@@ -254,7 +254,11 @@ where
 }
 
 /// Sends a comment to a comments_url on GitHub
-fn post_comment(comments_url: String, github_token: String, message: String) -> Result<(), Box<dyn std::error::Error>> {
+fn post_comment(
+    comments_url: String,
+    github_token: String,
+    message: String,
+) -> Result<(), Box<dyn std::error::Error>> {
     let action_headers = {
         let mut headers = HeaderMap::new();
         let user_agent = format!("action-cli/{}", std::env!("CARGO_PKG_VERSION"));
@@ -264,9 +268,7 @@ fn post_comment(comments_url: String, github_token: String, message: String) -> 
     };
 
     let client = reqwest::blocking::Client::new();
-    let body = json!({
-        "body": message
-    });
+    let body = json!({ "body": message });
     let resp = client
         .post(&comments_url)
         .headers(action_headers)
@@ -292,7 +294,7 @@ fn get_comments_url() -> Result<String, Box<dyn std::error::Error>> {
     if pull_request.is_object() {
         match pull_request["comments_url"].as_str() {
             None => panic!("comments_url missing"),
-            Some(comments_url) => Ok(comments_url.to_owned())
+            Some(comments_url) => Ok(comments_url.to_owned()),
         }
     } else {
         panic!("this action only works inside of \"pull_request\" events.");
